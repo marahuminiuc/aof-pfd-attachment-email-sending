@@ -1,0 +1,82 @@
+    public bool SendEmail(string[] to, string subject, string body, List<System.Net.Mail.Attachment> attachments = null, string from = null)
+        {
+            var emailSentSuccessfully = false;
+
+            try
+            {
+                var mail = new MailMessage();
+                var smtpClient = new SmtpClient();
+                if (!String.IsNullOrEmpty(from))
+                {
+                    mail.From = new MailAddress(from);
+                    mail.Sender = new MailAddress(from);
+                }
+
+                foreach (var recipient in to)
+                {
+                    mail.To.Add(recipient);
+                }
+
+                mail.Subject = subject;
+                mail.Body = body;
+
+                if (attachments != null)
+                    attachments.ForEach(a =>
+                    {
+                        mail.Attachments.Add(a);
+                    });
+                    
+                // smtpClient.Host
+                // smtpClient.Port
+                // smtpClient.Credentials
+                        
+                smtpClient.Send(mail);
+
+                emailSentSuccessfully = true;
+            }
+            catch (Exception)
+            {
+                emailSentSuccessfully = false;
+            }
+
+            return emailSentSuccessfully;
+        }
+
+        /// <summary>
+        /// Create an email attachment from a data stream
+        /// </summary>
+        /// <param name="attachmentStream">The stream of data</param>
+        /// <param name="attachmentName">The name of the attachment</param>
+        /// <param name="attachmentMediaType">The type of the file attached</param>
+        /// <returns></returns>
+        public Attachment CreateEmailAttachment(MemoryStream attachmentStream, string attachmentName, string attachmentMediaType)
+        {
+            // Create  the file attachment for the e-mail message.
+            System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(new MemoryStream(attachmentStream.ToArray()), attachmentName, attachmentMediaType);
+
+            // Add time stamp information for the file.
+            //ContentDisposition disposition = attachment.ContentDisposition;
+            //disposition.CreationDate = DateTime.Now;
+            //disposition.ModificationDate = DateTime.Now;
+            //disposition.Inline = false;
+
+            return attachment;
+        }
+
+
+
+
+
+//apel
+
+List<System.Net.Mail.Attachment> attachments = new List<System.Net.Mail.Attachment>();
+var attachment = sendEmailService.CreateEmailAttachment(reportStream, "Invoice.pdf", "application/pdf");
+
+attachments.Add(attachment);
+
+string body = "Time to pay your bills";
+string[] to = {"john.doe@company.com"};
+string subject = "Invoices";
+string from = "john.smith@company.com"
+
+sendEmailService.SendEmail(to, subject, body, attachments, from);
